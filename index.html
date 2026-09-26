@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptLab · 提示词工程实验室</title>
+<meta name="description" content="把 Prompt 工程从经验变成方法：可视化构建、策略对比、质量评估。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">PL</div>
+      <div class="brand-text">
+        <div class="brand-name">PromptLab</div>
+        <div class="brand-sub">提示词工程实验室</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-view="builder">
+        <span class="nav-mark">构</span>
+        <span class="nav-label">Prompt 构建器</span>
+      </button>
+      <button class="nav-item" data-view="arena">
+        <span class="nav-mark">策</span>
+        <span class="nav-label">策略对比实验室</span>
+      </button>
+      <button class="nav-item" data-view="evaluator">
+        <span class="nav-mark">评</span>
+        <span class="nav-label">输出质量评估</span>
+      </button>
+      <button class="nav-item" data-view="patterns">
+        <span class="nav-mark">式</span>
+        <span class="nav-label">提示词模式库</span>
+      </button>
+      <button class="nav-item" data-view="method">
+        <span class="nav-mark">法</span>
+        <span class="nav-label">方法论</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-num" id="stat-elements">7</div>
+          <div class="stat-label">核心要素</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="stat-patterns">14</div>
+          <div class="stat-label">模式</div>
+        </div>
+      </div>
+      <div class="sidebar-note">纯前端实现 · 无外部依赖</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title" id="page-title">Prompt 构建器</h1>
+        <p class="page-desc" id="page-desc">勾选要素，实时生成结构化的 Prompt。</p>
+      </div>
+      <div class="topbar-right">
+        <div class="mode-switch" id="mode-switch">
+          <button class="mode-btn active" data-mode="demo">演示数据</button>
+          <button class="mode-btn" data-mode="api">接入模型</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <section class="view active" id="view-builder">
+        <div class="builder-grid">
+          <div class="builder-left">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">选择任务场景</span>
+              </div>
+              <div class="chip-row" id="scenario-chips"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">七大要素</span>
+                <button class="text-btn" id="toggle-all">全部展开</button>
+              </div>
+              <div class="element-list" id="element-list"></div>
+            </div>
+          </div>
+
+          <div class="builder-right">
+            <div class="panel sticky">
+              <div class="panel-head">
+                <span class="panel-title">实时预览</span>
+                <div class="panel-actions">
+                  <span class="counter" id="builder-counter">0 / 7 要素</span>
+                  <button class="btn btn-ghost" id="copy-prompt">复制</button>
+                </div>
+              </div>
+              <pre class="code-block" id="prompt-preview"></pre>
+              <div class="panel-foot" id="builder-tips">
+                <div class="tip-title">当前 Prompt 的短板</div>
+                <div class="tip-list" id="builder-gaps"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-arena">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">选择任务</span>
+          </div>
+          <div class="chip-row" id="arena-chips"></div>
+          <div class="task-input" id="arena-input"></div>
+        </div>
+
+        <div class="arena-grid" id="arena-grid"></div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">评分对比</span>
+            <span class="panel-hint">五个维度横向对比，分数越高越好</span>
+          </div>
+          <div class="score-table-wrap">
+            <table class="score-table" id="score-table"></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-evaluator">
+        <div class="eval-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <span class="panel-title">待评估输出</span>
+              <div class="panel-actions">
+                <button class="btn btn-ghost" data-sample="good">载入高质量示例</button>
+                <button class="btn btn-ghost" data-sample="bad">载入低质量示例</button>
+              </div>
+            </div>
+            <textarea class="eval-input" id="eval-input" placeholder="把一段 AI 生成的输出粘贴到这里，点击下方按钮开始评估……"></textarea>
+            <div class="eval-actions">
+              <button class="btn btn-primary" id="eval-run">开始评估</button>
+              <button class="btn btn-ghost" id="eval-clear">清空</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <span class="panel-title">评估结果</span>
+              <span class="panel-hint" id="eval-mode-hint">本地规则引擎</span>
+            </div>
+            <div class="eval-result" id="eval-result">
+              <div class="empty-state">评估结果将显示在这里</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">LLM-as-a-Judge 评判 Prompt</span>
+            <div class="panel-actions">
+              <button class="btn btn-ghost" id="copy-judge">复制</button>
+            </div>
+          </div>
+          <p class="panel-lead">本地规则引擎只能覆盖形式层面的问题。真实生产中，把下面这段 Prompt 交给一个强模型，可以得到带理由的语义级评判——这就是 LLM-as-a-Judge 的思路：用模型评估模型，成本远低于人工，且评价标准可版本化管理。</p>
+          <pre class="code-block judge-block" id="judge-prompt"></pre>
+        </div>
+      </section>
+
+      <section class="view" id="view-patterns">
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">筛选</span>
+            <span class="panel-hint" id="patterns-count"></span>
+          </div>
+          <div class="chip-row" id="pattern-filters"></div>
+        </div>
+        <div class="pattern-grid" id="pattern-grid"></div>
+      </section>
+
+      <section class="view" id="view-method">
+        <div id="method-body"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div class="modal-mask" id="api-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">接入模型</span>
+      <button class="modal-close" id="api-close" aria-label="关闭">×</button>
+    </div>
+    <p class="modal-lead">配置一个 OpenAI 兼容接口后，「输出质量评估」会调用真实模型进行评判（LLM-as-a-Judge），而不是只跑本地规则。配置仅保存在你自己的浏览器里，不会上传到任何服务器。</p>
+
+    <div class="field">
+      <label>快捷填入</label>
+      <div class="chip-row" id="api-presets"></div>
+    </div>
+
+    <div class="field">
+      <label for="api-base">API 地址</label>
+      <input id="api-base" type="text" spellcheck="false" placeholder="https://api.openai.com/v1">
+      <div class="field-hint">需包含版本路径（如 /v1），程序会自动拼接 /chat/completions</div>
+    </div>
+
+    <div class="field">
+      <label for="api-key">API Key</label>
+      <input id="api-key" type="password" spellcheck="false" placeholder="sk-...">
+      <div class="field-hint">仅存于浏览器本地存储，不会随项目发布出去</div>
+    </div>
+
+    <div class="field">
+      <label for="api-model">模型名称</label>
+      <input id="api-model" type="text" spellcheck="false" placeholder="gpt-4o-mini">
+    </div>
+
+    <div class="modal-status" id="api-status"></div>
+
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="api-clear">清除配置</button>
+      <div class="modal-spacer"></div>
+      <button class="btn btn-ghost" id="api-test">测试连接</button>
+      <button class="btn btn-primary" id="api-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
